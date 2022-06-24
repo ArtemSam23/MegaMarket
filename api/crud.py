@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 
@@ -50,3 +53,8 @@ def update_item(db: Session, item: schemas.ItemCreate):
     db.commit()
     db.refresh(db_item)
     return db_item
+
+
+def get_sales(db: Session, date: datetime):
+    db_sales = db.query(models.Item).filter(and_(models.Item.type == models.Type.offer, models.Item.date >= date)).all()
+    return db_sales

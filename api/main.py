@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from fastapi import Depends, FastAPI, Path
 from fastapi.encoders import jsonable_encoder
@@ -65,6 +65,9 @@ async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depend
     )
 
 
-@app.get("/sales")
-async def get_sales():
-    pass
+@app.get("/sales", response_model=list[schemas.Item])
+async def get_sales(date: datetime.datetime, db: Session = Depends(get_db)):
+    # current_time = datetime.datetime.utcnow()
+    current_time = date
+    one_day_ago = current_time - datetime.timedelta(hours=24)
+    return crud.get_sales(db, one_day_ago)
