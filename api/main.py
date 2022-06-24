@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import Depends, FastAPI, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -36,12 +38,12 @@ def get_db():
 
 
 @app.post("/imports", response_model=schemas.Item)
-def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
+async def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
     crud.create_items(db, data.items)
 
 
 @app.get("/nodes/{id}", response_model=schemas.Item)
-def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
+async def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
     db_item = crud.get_item(db, item_id)
     if db_item:
         return db_item
@@ -52,7 +54,7 @@ def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)
 
 
 @app.delete("/delete/{id}")
-def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
+async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
     db_item = crud.get_item(db, item_id)
     if db_item:
         crud.delete_item(db, db_item)
@@ -61,3 +63,8 @@ def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_
         status_code=status.HTTP_404_NOT_FOUND,
         content=jsonable_encoder({"message": "Item not found"}),
     )
+
+
+@app.get("/sales")
+async def get_sales():
+    pass

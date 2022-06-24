@@ -1,7 +1,7 @@
+from datetime import timezone
 from typing import Optional, Union
 from pydantic import BaseModel, root_validator, validator
 from pydantic.schema import datetime
-
 from .models import Type
 
 
@@ -49,6 +49,9 @@ class Item(BaseModel):
 
     class Config:
         orm_mode = True
+        json_encoders = {
+            datetime: lambda v: v.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + "Z"
+        }
 
 
 class ItemCreate(BaseModel):

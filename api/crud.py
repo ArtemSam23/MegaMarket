@@ -12,6 +12,8 @@ def create_item(db: Session, item: schemas.ItemCreate):
     db_item = models.Item(**item.dict())
     db.add(db_item)
     db.commit()
+    if db_item.parentId:
+        update_parents_date(db, db_item.parentId, item.date)
     db.refresh(db_item)
     return db_item
 
@@ -33,6 +35,8 @@ def update_parents_date(db: Session, parent_id, date):
     db_parent: models.Item = db.query(models.Item).get(parent_id)
     db_parent.date = date
     db.commit()
+    if db_parent.parentId:
+        update_parents_date(db, db_parent.parentId, date)
 
 
 def update_item(db: Session, item: schemas.ItemCreate):
@@ -40,8 +44,9 @@ def update_item(db: Session, item: schemas.ItemCreate):
     db_item.name = item.name
     db_item.price = item.price
     db_item.parentId = item.parentId
-    print(db_item.parentId)
     db_item.date = item.date
+    if db_item.parentId:
+        update_parents_date(db, db_item.parentId, item.date)
     db.commit()
     db.refresh(db_item)
     return db_item
