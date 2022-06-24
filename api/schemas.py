@@ -6,6 +6,9 @@ from .models import Type
 
 
 def explore_category(children):
+    """
+    Рекурсивно обходим
+    """
     sum_price = 0
     count_offers = 0
 
@@ -30,7 +33,7 @@ class Item(BaseModel):
     date: datetime
     children: Optional[list["Item"]]
 
-    @root_validator()
+    @root_validator
     def set_price(cls, values):
         if values["type"] == Type.category:
             children = values.get("children")
@@ -61,8 +64,21 @@ class ItemCreate(BaseModel):
         if values["type"] == Type.category:
             if price is not None:
                 raise TypeError('Validation Failed')
-        elif type(price) is int:
+        elif type(price) is not int:
             raise TypeError('Validation Failed')
+        return price
 
     class Config:
         orm_mode = True
+
+
+class ItemImport(BaseModel):
+    items: list[ItemCreate]
+    updateDate: datetime
+
+    @root_validator(pre=True)
+    def set_items_date(cls, values):
+        date = values["updateDate"]
+        for item in values["items"]:
+            item["date"] = date
+        return values

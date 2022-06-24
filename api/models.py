@@ -19,4 +19,4 @@ class Item(Base):
     price = Column(Integer, nullable=True)
     parentId = Column(String, ForeignKey("items.id"), nullable=True)
     date = Column(DateTime(timezone=True))
-    children = relation('Item', remote_side=[parentId])
+    children = relation('Item', remote_side=[parentId], cascade="all,delete")
