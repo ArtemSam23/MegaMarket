@@ -2,6 +2,8 @@ from datetime import timezone
 from typing import Optional, Union
 from pydantic import BaseModel, root_validator, validator
 from pydantic.schema import datetime
+
+from . import main
 from .models import Type
 
 
@@ -70,6 +72,13 @@ class ItemCreate(BaseModel):
         elif type(price) is not int:
             raise TypeError('Validation Failed')
         return price
+
+    @validator('parentId')
+    def validate_parent(cls, parentId, values):
+        from app import crud
+        db = next(main.get_db())
+        if not crud.get_item(db, parentId):
+            raise ValueError(f'Parent with id {parentId} does not exist')
 
     class Config:
         orm_mode = True
