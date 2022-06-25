@@ -3,6 +3,7 @@ import datetime
 from fastapi import Depends, FastAPI, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.requests import Request
@@ -14,7 +15,13 @@ from .database import SessionLocal, engine
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Изменяем изначальный 422 статус FastApi на 400 и добавляем модель, которая не прошла валидацию
 # noinspection PyUnusedLocal

@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 
-def config(filename='api/database.ini', section='postgresql'):
+def config(filename='app/database.ini', section='postgresql'):
     # create parser
     parser = ConfigParser()
     # read config file
@@ -18,4 +18,4 @@ def config(filename='api/database.ini', section='postgresql'):
 
 
 if __name__ == '__main__':
-    print(config(filename="database.ini"))
+    print("postgresql://{user}:{password}@{host}/{database}".format(**config(filename="database.ini")))
