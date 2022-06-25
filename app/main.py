@@ -23,14 +23,23 @@ app.add_middleware(
         allow_headers=["*"],
     )
 
+
 # Изменяем изначальный 422 статус FastApi на 400 и добавляем модель, которая не прошла валидацию
 # noinspection PyUnusedLocal
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        # content=jsonable_encoder({"message": "Validation Failed"})
-        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body})
+        content=jsonable_encoder({"message": "Validation Failed"})
+        # content=jsonable_encoder({"detail": exc.errors(), "body": exc.body})
+    )
+
+
+@app.exception_handler(500)
+async def internal_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=jsonable_encoder({"message": "Validation Failed"})
     )
 
 
