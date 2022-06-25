@@ -10,15 +10,15 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from . import crud, models, schemas
-from .database import SessionLocal, engine
+from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
         allow_credentials=True,
+        allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -35,22 +35,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+# noinspection PyUnusedLocal
 @app.exception_handler(500)
 async def internal_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder({"message": "Validation Failed"})
     )
-
-
-# Сессия базы данных
-# Для каждого запроса будет использоваться отдельная сессия
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @app.post("/imports", response_model=schemas.Item)

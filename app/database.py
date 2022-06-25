@@ -11,3 +11,13 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
+
+# Сессия базы данных
+# Для каждого запроса будет использоваться отдельная сессия
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
