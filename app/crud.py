@@ -6,6 +6,10 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 
 
+class ParentNotFound(Exception):
+    pass
+
+
 def get_item(db: Session, item_id):
     return db.query(models.Item).get(item_id)
 
@@ -35,10 +39,13 @@ def delete_item(db: Session, db_item):
 
 def update_parents_date(db: Session, parent_id, date):
     db_parent: models.Item = db.query(models.Item).get(parent_id)
-    db_parent.date = date
-    if db_parent.parentId:
-        update_parents_date(db, db_parent.parentId, date)
-    db.commit()
+    if db_parent:
+        db_parent.date = date
+        if db_parent.parentId:
+            update_parents_date(db, db_parent.parentId, date)
+        db.commit()
+    else:
+        raise ParentNotFound(f"Parent with id {parent_id} not found")
 
 
 def update_item(db: Session, item: schemas.ItemCreate):
@@ -54,6 +61,11 @@ def update_item(db: Session, item: schemas.ItemCreate):
     return db_item
 
 
-def get_sales(db: Session, date: datetime):
-    db_sales = db.query(models.Item).filter(and_(models.Item.type == models.Type.offer, models.Item.date >= date)).all()
+def get_sales(db: Session, date_start: datetime, date_end: datetime):
+    db_sales = db.query(models.Item).filter(
+        and_(
+            models.Item.type == models.Type.offer,
+            date_start <= models.Item.date,
+            models.Item.date <= date_end)
+    ).all()
     return db_sales

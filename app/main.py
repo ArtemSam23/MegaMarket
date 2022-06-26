@@ -58,7 +58,10 @@ async def internal_exception_handler(request: Request, exc: Exception):
 
 @app.post("/imports", response_model=schemas.Item)
 async def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
-    crud.create_items(db, data.items)
+    try:
+        crud.create_items(db, data.items)
+    except crud.ParentNotFound as exc:
+        raise RequestValidationError({"message": str(exc)})
 
 
 @app.get("/nodes/{id}", response_model=schemas.Item)
@@ -88,4 +91,4 @@ async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depend
 async def get_sales(date: datetime.datetime, db: Session = Depends(get_db)):
     current_time = date
     one_day_ago = current_time - datetime.timedelta(hours=24)
-    return crud.get_sales(db, one_day_ago)
+    return crud.get_sales(db, one_day_ago, current_time)

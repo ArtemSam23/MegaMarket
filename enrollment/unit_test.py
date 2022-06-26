@@ -8,8 +8,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-API_BASEURL = "https://protect-2043.usr.yandex-academy.ru"
-# API_BASEURL = "http://localhost"
+# API_BASEURL = "https://protect-2043.usr.yandex-academy.ru"
+API_BASEURL = "http://localhost"
 
 ROOT_ID = "069cb8d7-bbdd-47d3-ad8f-82ef4c269df1"
 
