@@ -51,6 +51,7 @@ class Item(BaseModel):
 
     class Config:
         orm_mode = True
+        use_enum_values = True
         json_encoders = {
             datetime: lambda v: v.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + "Z"
         }
@@ -84,6 +85,7 @@ class ItemCreate(BaseModel):
 
     class Config:
         orm_mode = True
+        use_enum_values = True
 
 
 class ItemImport(BaseModel):
