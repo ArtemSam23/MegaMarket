@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-
 from . import models, schemas
 
 
@@ -14,9 +13,9 @@ def get_item(db: Session, item_id):
 def create_item(db: Session, item: schemas.ItemCreate):
     db_item = models.Item(**item.dict())
     db.add(db_item)
-    db.commit()
     if db_item.parentId:
         update_parents_date(db, db_item.parentId, item.date)
+    db.commit()
     db.refresh(db_item)
     return db_item
 
@@ -37,9 +36,9 @@ def delete_item(db: Session, db_item):
 def update_parents_date(db: Session, parent_id, date):
     db_parent: models.Item = db.query(models.Item).get(parent_id)
     db_parent.date = date
-    db.commit()
     if db_parent.parentId:
         update_parents_date(db, db_parent.parentId, date)
+    db.commit()
 
 
 def update_item(db: Session, item: schemas.ItemCreate):

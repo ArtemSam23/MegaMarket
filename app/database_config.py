@@ -1,10 +1,12 @@
+# Файл доя конфигурации базы данных
+
 from configparser import ConfigParser
 
 
 def config(filename='app/database.ini', section='postgresql'):
-    # create parser
+    # создаем parser
     parser = ConfigParser()
-    # read config file
+    # файл конфигурации должен быть в директории app
     parser.read(filename)
 
     db_config = {}

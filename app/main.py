@@ -14,13 +14,23 @@ from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+
+responses = {
+    "200": {"description": "Success"},
+    "400": {"description": "Item not found"},
+    "404": {"description": "Validation failed"},
+    "422": {"description": "Is not returned by the server"}
+    # 422 статус код нельзя убрать из openapi.yaml, потому что он дефолтный для FastAPI
+    # Сервис его не возвращает, поэтому просто переопределим его описание для схемы
+}
+
+app = FastAPI(responses=responses)
 app.add_middleware(
-        CORSMiddleware,
-        allow_credentials=True,
-        allow_origins=["*"],
-        allow_methods=["*"],
-        allow_headers=["*"],
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     )
 
 
@@ -30,17 +40,19 @@ app.add_middleware(
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=jsonable_encoder({"message": "Validation Failed"})
+        content=jsonable_encoder({"code": 400, "message": "Validation Failed"})
         # content=jsonable_encoder({"detail": exc.errors(), "body": exc.body})
     )
 
 
+# Плохой тон и так делать нельзя!
+# Используется для обработки ошибок базы данных, если они произошли в crud.py
 # noinspection PyUnusedLocal
 @app.exception_handler(500)
 async def internal_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=jsonable_encoder({"message": "Validation Failed"})
+        content=jsonable_encoder({"code": 400, "message": "Validation Failed"})
     )
 
 
@@ -56,7 +68,7 @@ async def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(g
         return db_item
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"message": "Item not found"}),
+        content=jsonable_encoder({"code": 404, "message": "Item not found"}),
     )
 
 
@@ -68,13 +80,12 @@ async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depend
         return JSONResponse(status_code=status.HTTP_200_OK, content=None)
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"message": "Item not found"}),
+        content=jsonable_encoder({"code": 404, "message": "Item not found"}),
     )
 
 
 @app.get("/sales", response_model=list[schemas.Item])
 async def get_sales(date: datetime.datetime, db: Session = Depends(get_db)):
-    # current_time = datetime.datetime.utcnow()
     current_time = date
     one_day_ago = current_time - datetime.timedelta(hours=24)
     return crud.get_sales(db, one_day_ago)
