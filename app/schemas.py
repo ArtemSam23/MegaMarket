@@ -51,7 +51,6 @@ class Item(BaseModel):
 
     class Config:
         orm_mode = True
-        use_enum_values = True
         json_encoders = {
             datetime: lambda v: v.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + "Z"
         }
@@ -69,23 +68,22 @@ class ItemCreate(BaseModel):
     def validate_price(cls, price, values):
         if values["type"] == Type.category:
             if price is not None:
-                raise TypeError('Validation Failed')
+                raise TypeError('Price for category should ne null')
         elif type(price) is not int:
-            raise TypeError('Validation Failed')
+            raise TypeError('Price of the offer must be integer')
         elif price < 0:
-            raise ValueError('Validation Failed')
+            raise ValueError('Price must be positive or zero')
         return price
 
     @validator('parentId')
     def validate_parent(cls, parentId, values):
         if parentId is not None:
             if parentId == values["id"]:
-                raise ValueError('Validation Failed')
+                raise ValueError('Circular reference detected')
         return parentId
 
     class Config:
         orm_mode = True
-        use_enum_values = True
 
 
 class ItemImport(BaseModel):
