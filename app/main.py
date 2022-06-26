@@ -46,7 +46,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # Плохой тон и так делать нельзя!
-# Используется для обработки ошибок базы данных, если они произошли в crud.py
+# Используется для обработки ошибок базы данных, если они произошли в crud.py и не были обработаны
 # noinspection PyUnusedLocal
 @app.exception_handler(500)
 async def internal_exception_handler(request: Request, exc: Exception):
@@ -58,6 +58,9 @@ async def internal_exception_handler(request: Request, exc: Exception):
 
 @app.post("/imports", response_model=schemas.Item)
 async def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
+    """
+    Импорт новых товаров или категорий. Товары/категории импортированные повторно обновляются.
+    """
     try:
         crud.create_items(db, data.items)
     except crud.ParentNotFound as exc:
@@ -66,6 +69,9 @@ async def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
 
 @app.get("/nodes/{id}", response_model=schemas.Item)
 async def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
+    """
+    Получение товара/категории по id.
+    """
     db_item = crud.get_item(db, item_id)
     if db_item:
         return db_item
@@ -77,6 +83,9 @@ async def get_item(item_id: str = Path(..., alias='id'), db: Session = Depends(g
 
 @app.delete("/delete/{id}")
 async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depends(get_db)):
+    """
+    Удаление товара/категории по id. При удалении категории все ее дочерние товары/категории удаляются.
+    """
     db_item = crud.get_item(db, item_id)
     if db_item:
         crud.delete_item(db, db_item)
@@ -89,6 +98,9 @@ async def delete_item(item_id: str = Path(..., alias='id'), db: Session = Depend
 
 @app.get("/sales", response_model=list[schemas.Item])
 async def get_sales(date: datetime.datetime, db: Session = Depends(get_db)):
+    """
+    Получение списка товаров, проданных за период [date - 1 day, date].
+    """
     current_time = date
     one_day_ago = current_time - datetime.timedelta(hours=24)
     return crud.get_sales(db, one_day_ago, current_time)
