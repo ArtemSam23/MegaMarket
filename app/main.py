@@ -46,7 +46,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # Плохой тон и так делать нельзя!
-# Используется для обработки ошибок базы данных, если они произошли в crud.py и не были обработаны
+# Используется для обработки ошибок, если они не были обработаны
 # noinspection PyUnusedLocal
 @app.exception_handler(500)
 async def internal_exception_handler(request: Request, exc: Exception):
@@ -63,7 +63,7 @@ async def create_items(data: schemas.ItemImport, db: Session = Depends(get_db)):
     """
     try:
         crud.create_items(db, data.items)
-    except crud.ParentNotFound as exc:
+    except crud.DataBaseException as exc:
         raise RequestValidationError({"message": str(exc)})
 
 

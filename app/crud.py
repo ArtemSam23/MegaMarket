@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 
 
-class ParentNotFound(Exception):
+class DataBaseException(Exception):
     pass
 
 
@@ -45,11 +45,13 @@ def update_parents_date(db: Session, parent_id, date):
             update_parents_date(db, db_parent.parentId, date)
         db.commit()
     else:
-        raise ParentNotFound(f"Parent with id {parent_id} not found")
+        raise DataBaseException(f"Parent with id {parent_id} not found")
 
 
 def update_item(db: Session, item: schemas.ItemCreate):
     db_item: models.Item = db.query(models.Item).get(item.id)
+    if db_item.type != item.type:
+        raise DataBaseException('Update type is not allowed')
     db_item.name = item.name
     db_item.price = item.price
     db_item.parentId = item.parentId

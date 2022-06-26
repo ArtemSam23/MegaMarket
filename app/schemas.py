@@ -93,6 +93,10 @@ class ItemImport(BaseModel):
     @root_validator(pre=True)
     def set_items_date(cls, values):
         date = values["updateDate"]
+        ids = set()
         for item in values["items"]:
             item["date"] = date
+            if item["id"] in ids:
+                raise ValueError('Duplicate id')
+            ids.add(item["id"])
         return values
