@@ -9,9 +9,8 @@ docker-compose up -d
 ```
 Сервис будет запушен на ```localhost:80```
 
-## Документация REST API
-Документацию можно посмотреть по адресу https://protect-2043.usr.yandex-academy.ru/docs.  
-Или после запуска сервиса на вашем компьютере по адресу http://localhost/docs.
+## Документация REST API 
+Можно посмотреть после развертывания по адресу http://localhost/docs.
 
 ## Тесты
 Тесты находятся в папке ```tests```
